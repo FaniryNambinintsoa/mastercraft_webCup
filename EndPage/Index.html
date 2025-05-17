@@ -111,7 +111,7 @@
   padding: 20px;
   color: #fff;
   overflow: hidden;
-  box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+  box-shadow: 0 4px 15px rgba(235, 8, 8, 0.2);
   transition: transform 0.3s, box-shadow 0.3s;
   display: flex;
   flex-direction: column;
@@ -218,7 +218,14 @@
   background-color: #e83e3e;
 }
 
-
+#section-exemples {
+  background-image: url('image/5acd92492862f2ad59e2d4618dcd5302.jpg');
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  position: relative;
+  z-index: 1;
+}
 
 /* Animation de base (pour cause de simplicité, vous pouvez l’étendre ou la personnaliser) */
 @keyframes fadeInDown {
@@ -332,6 +339,21 @@ footer {
             gap: 20px;
         }
 
+        
+        .fullscreen-section {
+  height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+
+
   </style>
 </head>
 <body>
@@ -358,10 +380,12 @@ footer {
     </div>
     <div class="dots"></div>
   </section>
+
+  <section class="fullscreen-section" id="section-exemples">
+
   <div class="animated-section">
   <div class="example-list">
 
-    
     <!-- Exemple 1: Fin d'études émouvante -->
     <div class="example-card" style="background: linear-gradient(135deg, #667eea, #764ba2);">
       <h3>Fin d'études émouvante</h3>
@@ -394,6 +418,11 @@ footer {
 </div>
 
   <h2 class="section-title" id="exempleTitre">Exemple de message</h2>
+    </section>
+</section>
+
+
+
 
   <script>
     // Sélectionne le titre
