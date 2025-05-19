@@ -1,6 +1,9 @@
 <?php
-session_start();
-$verifLog = isset($_SESSION['user_id']);
+include('bdd/bdconnect.php');
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();  // Démarre la session si elle n'est pas déjà démarrée
+  }
+
 ?>
 <!DOCTYPE html>
 <html lang="fr">
@@ -119,7 +122,7 @@ $verifLog = isset($_SESSION['user_id']);
   padding: 20px;
   color: #fff;
   overflow: hidden;
-  box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+  box-shadow: 0 4px 15px rgba(235, 8, 8, 0.2);
   transition: transform 0.3s, box-shadow 0.3s;
   display: flex;
   flex-direction: column;
@@ -226,6 +229,14 @@ $verifLog = isset($_SESSION['user_id']);
   background-color: #e83e3e;
 }
 
+#section-exemples {
+  background-image: url('image/5acd92492862f2ad59e2d4618dcd5302.jpg');
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  position: relative;
+  z-index: 1;
+}
 
 
 /* Animation de base (pour cause de simplicité, vous pouvez l’étendre ou la personnaliser) */
@@ -340,6 +351,17 @@ footer {
             gap: 20px;
         }
 
+        .fullscreen-section {
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
 
         /* Blur de la page lorsqu’on ouvre le modal */
     body.modal-open .main-content {
@@ -376,34 +398,65 @@ footer {
   </style>
 </head>
 
-
-  <!-- Contenu principal
-  <div class="main-content">
-    <nav class="navbar navbar-light bg-light">
-      <div class="container-fluid">
-        <span class="navbar-brand mb-0 h1">Mon Site</span>
-        <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#loginModal">
-          Se connecter
-        </button>
-      </div>
-    </nav>
-
-    <div class="container mt-5">
-      <h1>Bienvenue !</h1>
-      <p>Voici le contenu principal de la page.</p>
-    </div>
-  </div> -->
-
-
-
-  
-
   <header>
     <div class="logo">TheEnd.Page</div>
     <nav>
-    <button class="btn btn-light w-100" data-bs-toggle="modal" data-bs-target="#loginModal">
+
+<?php
+    // Vérifie si les données de l'utilisateur sont présentes dans la session
+    if (isset($_SESSION['nom_complet'])) {
+
+        $fullName = trim($_SESSION['nom_complet']);
+
+        // 2. On cherche la position du premier espace
+        $posSpace = strpos($fullName, ' ');
+        
+        // 3. Si on a trouvé un espace, on prend la lettre avant et après
+        if ($posSpace !== false) {
+            $firstInitial  = substr($fullName, 0, 1);
+            $secondInitial = substr($fullName, $posSpace + 1, 1);
+            $initiales     = strtoupper($firstInitial . $secondInitial);
+        } else {
+            // Pas d'espace : on tombe en fallback sur la première lettre
+            $initiales = strtoupper(substr($fullName, 0, 1));
+        }
+        
+    ?>
+    
+        
+          <div style="display: flex; align-items: center;">
+              <!-- Affiche les initiales de l'utilisateur -->
+              <div style="
+                  background-color: #0bbe38;
+                  border-radius: 50%;
+                  width: 40px;
+                  height: 40px;
+                  display: flex;
+                  align-items: center;
+                  justify-content: center;
+                  font-weight: bold;
+                  margin-right: 10px;
+              ">
+                  <?php echo $initiales; ?>
+              </div>
+          
+        
+            <div style="display: flex; flex-direction: column;">
+                <!-- Affiche le prénom de l'utilisateur -->
+                <span class="nom">Bonjour, <?php echo htmlspecialchars($_SESSION['nom_complet']);?></span>
+                <!-- Lien pour se déconnecter -->
+                <a href="deconnexion.php" style="font-size: 12px; color: red; text-decoration: none; margin-top: 2px;">
+                    Se déconnecter
+                </a>
+            </div>
+          </div>
+    <?php } else { ?>
+        <!-- Affiche le bouton de connexion si l'utilisateur n'est pas connecté -->
+        <button class="btn btn-light w-100" data-bs-toggle="modal" data-bs-target="#loginModal">
           Se connecter
         </button>
+    <?php } ?>
+
     </nav>
   </header>
 
@@ -420,9 +473,9 @@ footer {
 
 
 
-  <?php if ($verifLog): ?>
+  <?php if(isset($_SESSION['nom_complet'])): ?>
       <!-- Bouton actif -->
-      <button class="animate fade-in" onclick="window.location.href='Theme.html'">Démarrer</button>
+      <button class="animate fade-in" onclick="window.location.href='demandeinfo.php'">Démarrer</button>
     <?php else: ?>
       <!-- Bouton qui redirige vers le login -->
       <button 
@@ -434,11 +487,12 @@ footer {
       
     <?php endif; ?>
 
-1
 </div>
     </div>
     <div class="dots"></div>
   </section>
+
+  <section class="fullscreen-section" id="section-exemples">
   <div class="animated-section">
   <div class="example-list">
 
@@ -475,7 +529,7 @@ footer {
 </div>
 
   <h2 class="section-title" id="exempleTitre">Exemple de message</h2>
-
+  </section>
   <script>
     // Sélectionne le titre
     const titreExemple = document.getElementById('exempleTitre');
@@ -496,7 +550,6 @@ footer {
       }
     });
   </script>
-  
    <!-- Modal Connexion -->
    <div class="modal fade" id="loginModal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
@@ -506,14 +559,14 @@ footer {
           <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
         </div>
         <div class="modal-body">
-          <form id="loginForm">
+          <form id="loginForm" action="bdd/requete_connection.php" method="POST">
             <div class="mb-3">
               <label for="loginEmail" class="form-label">E-mail</label>
-              <input type="email" class="form-control" id="loginEmail" placeholder="vous@example.com">
+              <input type="email" class="form-control" id="loginEmail" placeholder="vous@example.com" name="adresse_email" required>
             </div>
             <div class="mb-3">
               <label for="loginPassword" class="form-label">Mot de passe</label>
-              <input type="password" class="form-control" id="loginPassword" placeholder="••••••">
+              <input type="password" class="form-control" id="loginPassword" placeholder="••••••" name="mdp" required>
             </div>
             <button type="submit" class="btn btn-light w-100">Se connecter</button>
           </form>
@@ -538,32 +591,32 @@ footer {
           <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
         </div>
         <div class="modal-body">
-          <form id="signupForm">
+          <form id="signupForm" action="bdd/requete_inscription.php" method="POST">
             <div class="mb-3">
               <label for="signupName" class="form-label">Nom complet</label>
-              <input type="text" class="form-control" id="signupName" placeholder="Votre nom">
+              <input type="text" class="form-control" id="signupName" placeholder="Votre nom" name="nom_complet" required>
             </div>
             <div class="mb-3">
               <label for="signupEmail" class="form-label">E-mail</label>
-              <input type="email" class="form-control" id="signupEmail" placeholder="vous@example.com">
+              <input type="email" class="form-control" id="signupEmail" placeholder="vous@example.com" name="adresse_email" required>
             </div>
             <div class="mb-3">
               <label for="signupPassword" class="form-label">Mot de passe</label>
-              <input type="password" class="form-control" id="signupPassword" placeholder="••••••">
+              <input type="password" class="form-control" id="signupPassword" placeholder="••••••" name="mdp" required>
             </div>
             <div class="mb-3">
               <label for="signupConfirm" class="form-label">Confirmer mot de passe</label>
-              <input type="password" class="form-control" id="signupConfirm" placeholder="••••••">
+              <input type="password" class="form-control" id="signupConfirm" placeholder="••••••" name="conf_mdp" required>
             </div>
 
             <fieldset class="mb-3">
               <legend class="col-form-label">Votre genre</legend>
             <div class="form-check form-check-inline">
-            <input class="form-check-input" type="radio" name="signupChoice" id="choice1" value="1" checked>
+            <input class="form-check-input" type="radio" name="genre" id="choice1" value="homme" checked>
             <label class="form-check-label" for="choice1">Homme</label>
             </div>
             <div class="form-check form-check-inline">
-            <input class="form-check-input" type="radio" name="signupChoice" id="choice2" value="2">
+            <input class="form-check-input" type="radio" name="genre" id="choice2" value="femme">
             <label class="form-check-label" for="choice2">Femme</label>
             </div>
             </fieldset>
@@ -581,6 +634,67 @@ footer {
   <script
     src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"
   ></script>
+
+  <!-- Modal succès d'inscription -->
+<div class="modal fade" id="signupSuccessModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content bg-success text-white">
+      <div class="modal-header border-0">
+        <h5 class="modal-title">Inscription réussie</h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        <p>Votre compte a bien été créé. Vous pouvez maintenant vous connecter.</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="modal fade" id="loginSuccessModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content bg-success text-white">
+      <div class="modal-header border-0">
+        <h5 class="modal-title">Vous êtes connecté</h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        <p>Bienvenue, <?php echo $_SESSION['nom_complet']; ?> </p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<?php if (isset($_GET['signup']) && $_GET['signup'] === 'success'): ?>
+<script>
+  const successModal = new bootstrap.Modal(document.getElementById('signupSuccessModal'));
+  successModal.show();
+</script>
+<?php elseif (isset($_GET['signup']) && $_GET['signup'] === 'error_email'): ?>
+<script>
+  alert("Cet e-mail est déjà utilisé.");
+</script>
+<?php elseif (isset($_GET['signup']) && $_GET['signup'] === 'error_mdp'): ?>
+<script>
+  alert("Les mots de passe ne correspondent pas.");
+</script>
+<?php endif; ?>
+
+
+<?php if (isset($_GET['login']) && $_GET['login'] === 'loginsuccess'): ?>
+<script>
+  const successModal = new bootstrap.Modal(document.getElementById('loginSuccessModal'));
+  successModal.show();
+</script>
+<?php elseif (isset($_GET['login']) && $_GET['login'] === 'email_error'): ?>
+<script>
+  alert("Utilisateur innexistant.");
+</script>
+<?php elseif (isset($_GET['login']) && $_GET['login'] === 'mdp_error'): ?>
+<script>
+  alert("Mots de passe incorrect.");
+</script>
+<?php endif; ?>
+
 <footer>
   <div class="contact-info">
       <p>01 23 45 67 89</p>
